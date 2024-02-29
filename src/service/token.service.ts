@@ -17,17 +17,17 @@ export async function handleToken(activities: ActivityEntity[]) {
 
   const uniqueTokens = await getUniquePairs(contractIndexes);
   const existingTokens = await getTokens(uniqueTokens);
-  const activeListings = await fetchActiveListings(uniqueTokens);
+  const activeToken = await fetchActiveTokens(uniqueTokens);
   const newTokeArr: IToken[] = [];
 
   uniqueTokens.forEach((token) => {
     const key = `${token.contract_address}-${token.index}`;
-    const tokenActiveListings = activeListings[key];
+    const tokenActiveToken = activeToken[key];
     let minimumPrice = null;
 
-    if (tokenActiveListings && tokenActiveListings.length > 0) {
+    if (tokenActiveToken && tokenActiveToken.length > 0) {
       minimumPrice = Math.min(
-        ...tokenActiveListings.map((listing) => listing.listing_price),
+        ...tokenActiveToken.map((token) => token.listing_price),
       );
     }
 
@@ -57,15 +57,15 @@ async function processTokens(tokenArr: any[]) {
   }
 }
 
-async function fetchActiveListings(uniqueTokens: IContractIndex[]) {
-  logger.info('fetching active listings');
+async function fetchActiveTokens(uniqueTokens: IContractIndex[]) {
+  logger.info('fetching active tokens');
 
   const timeStampNow = Math.floor(Date.now() / 1000);
   const activityWhereQuery = uniqueTokens.map((token) => {
     return {
       contract_address: token.contract_address,
       token_index: token.index,
-      listing_to: MoreThan(timeStampNow),
+      tokens: MoreThan(timeStampNow),
     };
   });
 
